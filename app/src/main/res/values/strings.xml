@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Giphy Application</string>
+
+    <string name="trending_title">Trending GIFs</string>
+    <string name="search_title">Searching GIFs</string>
+    <string name="query_hint">Input Username</string>
+    <string name="favorites_title">Favorites</string>
+    <string name="favorites_item_title">Title</string>
+    <string name="favorites_add">Add Favorites!</string>
+    <string name="favorites_remove">Remove Favorites!</string>
+    <string name="user_name">User Name:</string>
+    <string name="error_text">서버와 연결을 확인해주세요.</string>
+    <string name="empty_favorites">즐겨찾기에 추가한 항목이 없습니다.</string>
+    <string name="trending_date_time">Trending Datetime:</string>
+    <string name="no_username">no username</string>
+</resources>
