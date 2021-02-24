@@ -40,9 +40,8 @@ class TrendingFragment : BaseFragment<FragmentTrendingBinding>() {
     }
 
     private fun setAdapter() {
-        trendingPagingAdapter = TrendingPagingAdapter { favoriteItem ->
-            trendingViewModel.onClickFavorite(favoriteItem)
-        }
+        trendingPagingAdapter =
+            TrendingPagingAdapter { favoriteItem -> trendingViewModel.onClickFavorite(favoriteItem) }
 
         binding.rvTrending.apply {
             setHasFixedSize(true)
@@ -124,5 +123,10 @@ class TrendingFragment : BaseFragment<FragmentTrendingBinding>() {
 
     private fun showErrorText() {
         binding.txtErrorMsg.isVisible = true
+    }
+
+    override fun onStop() {
+        super.onStop()
+        getTrending()
     }
 }
