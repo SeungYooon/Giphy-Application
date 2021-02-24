@@ -18,12 +18,17 @@ class TrendingPagingAdapter(
     override fun onBindViewHolder(holder: TrendingViewHolder, position: Int) {
         val data = getItem(position)
         val favoriteBtn = holder.itemView.findViewById<ToggleButton>(R.id.toggleFavorite)
-        favoriteBtn.setOnCheckedChangeListener { buttonView, isChecked ->
-            when (isChecked) {
-                true -> buttonView.isChecked.not()
-                false -> buttonView.isChecked
-            }
+        holder.setIsRecyclable(false)
+
+        if (data != null) {
+            favoriteBtn.isChecked = data.isChecked
         }
+
+        favoriteBtn.setOnCheckedChangeListener(null)
+        favoriteBtn.setOnCheckedChangeListener { _, isChecked ->
+            getItem(holder.absoluteAdapterPosition)?.isChecked = isChecked
+        }
+
         data?.let { holder.bind(it) }
     }
 
@@ -35,14 +40,15 @@ class TrendingPagingAdapter(
         )
     }
 
-    inner class TrendingViewHolder(private val binding: ItemTrendingBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+    inner class TrendingViewHolder(
+        private val binding: ItemTrendingBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(favoriteItem: FavoriteItem) {
             binding.apply {
                 bindImage(imgGif, favoriteItem.images.original.imageUrl)
 
-                toggleFavorite.setOnCheckedChangeListener { _, _ ->
-                    onCheck.invoke(favoriteItem)
+                toggleFavorite.setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) onCheck.invoke(favoriteItem)
                 }
             }
         }
