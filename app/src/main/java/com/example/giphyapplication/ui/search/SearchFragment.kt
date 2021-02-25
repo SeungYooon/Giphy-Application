@@ -7,14 +7,13 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.lifecycleScope
 import com.example.giphyapplication.base.BaseFragment
 import com.example.giphyapplication.databinding.FragmentSearchBinding
-import com.example.giphyapplication.utils.UiState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class SearchFragment : BaseFragment<FragmentSearchBinding>() {
@@ -23,14 +22,13 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         FragmentSearchBinding::inflate
     private lateinit var searchAdapter: SearchAdapter
     private val viewModel: SearchViewModel by viewModels()
+    private var searchJob: Job? = null
 
-    @ExperimentalCoroutinesApi
-    @FlowPreview
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initSearch()
         setAdapter()
-        observeTrending()
         setCloseButton()
         setUpSearch()
     }
@@ -44,59 +42,45 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         }
     }
 
-    private fun observeTrending() {
-        viewModel.uiState.asLiveData().observe(viewLifecycleOwner, Observer { trendList ->
-            when (trendList) {
-                UiState.Loading -> {
-                    showLoadingView()
-                    hideRecyclerView()
-                }
-                is UiState.Success -> {
-                    hideLoadingView()
-                    showRecyclerView()
-                    searchAdapter.submitList(trendList.list)
-                }
-                is UiState.Error -> {
-                    hideLoadingView()
-                    showErrorText()
-                }
-            }
-        })
+    private fun initSearch() {
+        binding.searchView.setQuery("", false)
+        showEmptyText()
     }
 
-    @FlowPreview
-    @ExperimentalCoroutinesApi
     private fun setUpSearch() {
-        binding.searchView.setQuery("", false)
-
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
+                binding.searchView.clearFocus()
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                viewModel.setSearchQuery(newText.toString())
+                newText?.let { searchList -> searchTrending(searchList) }
                 return true
             }
         })
+    }
 
-        viewModel.searchResult.observe(viewLifecycleOwner, Observer { userName ->
-            searchAdapter.submitList(userName)
-        })
+    private fun searchTrending(query: String) {
+        searchJob?.cancel()
+        searchJob = viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.loadBySearchTrending(query).collectLatest { searchList ->
+                if (query.isEmpty()) {
+                    showEmptyText()
+                    hideRecyclerView()
+                } else {
+                    hideEmptyText()
+                    showRecyclerView()
+                    searchAdapter.submitData(searchList)
+                }
+            }
+        }
     }
 
     private fun setCloseButton() {
         binding.imgClose.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
-    }
-
-    private fun showLoadingView() {
-        binding.loadingView.isVisible = true
-    }
-
-    private fun hideLoadingView() {
-        binding.loadingView.isVisible = false
     }
 
     private fun showRecyclerView() {
@@ -107,7 +91,11 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         binding.rvSearch.isVisible = false
     }
 
-    private fun showErrorText() {
-        binding.txtErrorMsg.isVisible = true
+    private fun showEmptyText() {
+        binding.txtEmptyMsg.isVisible = true
+    }
+
+    private fun hideEmptyText() {
+        binding.txtEmptyMsg.isVisible = false
     }
 }

@@ -11,6 +11,7 @@
     <string name="user_name">User Name:</string>
     <string name="error_text">서버와 연결을 확인해주세요.</string>
     <string name="empty_favorites">즐겨찾기에 추가한 항목이 없습니다.</string>
+    <string name="empty_search">검색 결과가 없습니다.</string>
     <string name="trending_date_time">Trending Datetime:</string>
     <string name="no_username">no username</string>
 </resources>

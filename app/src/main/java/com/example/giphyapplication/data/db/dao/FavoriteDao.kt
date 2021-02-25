@@ -15,7 +15,4 @@ interface FavoriteDao {
 
     @Delete
     suspend fun removeFromFavorites(favoriteItem: FavoriteItem)
-
-    @Query("SELECT * FROM favorite_table WHERE name=:userName")
-    fun getTrendingByName(userName: String): Flow<List<FavoriteItem>>
 }

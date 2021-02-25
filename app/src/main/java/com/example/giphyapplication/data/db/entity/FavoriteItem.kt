@@ -7,12 +7,11 @@ import com.google.gson.annotations.SerializedName
 
 
 @Entity(tableName = "favorite_table")
-
 data class FavoriteItem(
     @PrimaryKey
     @SerializedName("title")
     val title: String,
-    val id: String,
+    var id: String,
     @SerializedName("username")
     val name: String,
     @SerializedName("trending_datetime")
